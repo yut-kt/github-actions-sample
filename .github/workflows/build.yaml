@@ -1,0 +1,25 @@
+name: 'Build'
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  push_to_ecr:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract version from git tag
+        id: extract_version
+        run: echo "${GITHUB_REF#refs/tags/}"
+      - uses: ./.github/actions/docker-build
+        with:
+          image-tag: ${{ steps.extract_version.outputs.stdout }}
+      - run: echo "image - ${{ steps.ecr-push.outputs.image }}"

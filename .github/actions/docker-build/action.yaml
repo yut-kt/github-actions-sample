@@ -1,0 +1,24 @@
+name: "Docker Build"
+description: "Build Docker Image Composite Action"
+
+inputs:
+  image-tag:
+    required: true
+    description: "The Docker Image tag."
+
+outputs:
+  image:
+    description: docker image
+    value: ${{ steps.build.outputs }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Docker build
+      id: build
+      env:
+        IMAGE_TAG: ${{ inputs.image-tag }}
+      shell: bash
+      run: |
+        docker build -t sample:$IMAGE_TAG --platform linux/x86_64 .
+        echo sample:$IMAGE_TAG
