@@ -1,0 +1,29 @@
+name: 'Main Merged'
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  gather-pr:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "merged_branch=${{ github.head_ref }}" >> "$GITHUB_OUTPUT"
+
+  push-stg:
+    needs: gather-pr
+    if: github.event_name == 'push' && startsWith(needs.gather-pr.outputs.merged_branch, 'stg/')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo '=== Staging ==='
+
+  push-prd:
+    needs: gather-pr
+    if: github.event_name == 'push' && startsWith(needs.gather-pr.outputs.merged_branch, 'prd/')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo '=== Production ==='
