@@ -16,10 +16,12 @@ jobs:
 
   push-stg:
     needs: gather-pr
-    if: github.event_name == 'push' && startsWith(needs.gather-pr.outputs.merged_branch, 'stg/')
     runs-on: ubuntu-latest
     steps:
       - run: echo '=== Staging ==='
+      - run: echo '${{ github.event_name }}'
+      - run: echo '${{ needs.gather-pr.outputs.merged_branch }}'
+      - run: echo "${{ toJson(github) }}"
 
   push-prd:
     needs: gather-pr
