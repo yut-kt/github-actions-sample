@@ -1,11 +1,11 @@
-name: 'Main Merged'
+name: 'Develop Merged'
 
 on:
   pull_request:
     types: [closed]
-    branches: [main]
+    branches: [develop]
   push:
-    branches: [main]
+    branches: [develop]
 
 jobs:
   gather-pr:
