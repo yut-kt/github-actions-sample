@@ -1,0 +1,21 @@
+name: 'Build'
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  push_to_ecr:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print GitHub context
+        run: |
+          echo "github context:"
+          echo "${{ toJson(github) }}"
