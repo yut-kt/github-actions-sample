@@ -1,0 +1,11 @@
+name: "Manual"
+
+on: workflow_dispatch
+
+jobs:
+  manual:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ github.ref }}
+      - run: echo "${{ toJson(github) }}"
+
