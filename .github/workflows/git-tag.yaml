@@ -1,0 +1,89 @@
+name: Create Git Tag with Semantic Versioning
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  extract-semantic-version:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      major: ${{ steps.extract_version.outputs.major }}
+      minor: ${{ steps.extract_version.outputs.minor }}
+      patch: ${{ steps.extract_version.outputs.patch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+      - name: Fetch all tags
+        run: git fetch --tags
+      - name: Describe latest tag
+        id: describe_latest_tag
+        run: |
+          tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - id: extract_version
+        run: |
+          tag=${{ steps.describe_latest_tag.outputs.tag }}
+          tag_without_v=${tag#v}
+          IFS='.' read -r major minor patch <<< "$tag_without_v"
+          echo "major=$major" >> "$GITHUB_OUTPUT"
+          echo "minor=$minor" >> "$GITHUB_OUTPUT"
+          echo "patch=$patch" >> "$GITHUB_OUTPUT"
+
+
+  minor-update:
+    if: github.ref_name == 'main'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    needs: extract-semantic-version
+    env:
+      MAJOR: ${{ needs.extract-semantic-version.outputs.major }}
+      MINOR: ${{ needs.extract-semantic-version.outputs.minor }}
+      PATCH: ${{ needs.extract-semantic-version.outputs.patch }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: New Tag
+        id: new_tag
+        run: echo "tag=v$MAJOR.$((MINOR + 1)).$PATCH" >> "$GITHUB_OUTPUT"
+      - name: Push Tag
+        env:
+          TAG: ${{ steps.new_tag.outputs.tag }}
+        run: |
+          git tag $TAG
+          git push origin $TAG
+
+  patch-update:
+    if: github.ref_name == 'develop'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    needs: extract-semantic-version
+    env:
+      MAJOR: ${{ needs.extract-semantic-version.outputs.major }}
+      MINOR: ${{ needs.extract-semantic-version.outputs.minor }}
+      PATCH: ${{ needs.extract-semantic-version.outputs.patch }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: New Tag
+        id: new_tag
+        run: echo "tag=v$MAJOR.$MINOR.$((PATCH + 1))" >> "$GITHUB_OUTPUT"
+      - name: Push Tag
+        env:
+          TAG: ${{ steps.new_tag.outputs.tag }}
+        run: |
+          git tag $TAG
+          git push origin $TAG
+
