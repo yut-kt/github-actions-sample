@@ -1,0 +1,41 @@
+name: Create Git Tag with Semantic Versioning
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  main-job:
+    if: ${{ github.ref_name == 'main' }}
+    runs-on: ubuntu-latest
+    outputs:
+      random-value: ${{ steps.gen.outputs.value }}
+    steps:
+      - id: gen
+        run: echo "value=main-$RANDOM" >> "$GITHUB_OUTPUT"
+
+  develop-job:
+    if: ${{ github.ref_name == 'develop' }}
+    runs-on: ubuntu-latest
+    outputs:
+      random-value: ${{ steps.gen.outputs.value }}
+    steps:
+      - id: gen
+        run: echo "value=dev-$RANDOM" >> "$GITHUB_OUTPUT"
+
+  confluence:
+    if: ${{ always() }}
+    needs:
+      - main-job
+      - develop-job
+    runs-on: ubuntu-latest
+    env:
+      CONFLUENCE_VALUE: ${{ join(needs.*.outputs.random-value, '') }}
+    steps:
+      - run: echo $CONFLUENCE_VALUE
