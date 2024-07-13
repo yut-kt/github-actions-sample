@@ -18,4 +18,4 @@ jobs:
       - name: Print GitHub context
         run: |
           echo "github context:"
-          echo "${{ toJson(github) }}"
+          echo '${{ toJson(github) }}'
