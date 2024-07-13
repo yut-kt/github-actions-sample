@@ -36,6 +36,6 @@ jobs:
       - develop-job
     runs-on: ubuntu-latest
     env:
-      CONFLUENCE_VALUE: ${{ join(needs.*.outputs.value, '') }}
+      CONFLUENCE_VALUE: ${{ join(needs.*.outputs.random-value, '') }}
     steps:
       - run: echo $CONFLUENCE_VALUE
