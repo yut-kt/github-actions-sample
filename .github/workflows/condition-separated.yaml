@@ -1,4 +1,4 @@
-name: Create Git Tag with Semantic Versioning
+name: Condition Separated Flow
 
 on:
   push:
